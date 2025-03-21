@@ -1,8 +1,37 @@
-# <center>📦 Container Store 📦</center>
-
+<div align="center" style="
+    background: linear-gradient(90deg,rgba(93, 189, 230, 0.85),rgb(157, 30, 138)); /* Gradient Background */
+    padding: 10px;
+    border-radius: 30px; /* Rounded Corners */
+    margin-bottom: 15px; /* Spacing below the title */
+">
+  <h1 style="
+    font-family: 'Arial Black', sans-serif; /* Modern Font */
+    font-size: 3em;
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Text Shadow */
+    margin: 0; /* Remove default margins */
+    display: inline-block; /* Keep it on one line if possible */
+  ">
+    <span style="
+      font-size: 1.2em; /* Adjust icon size */
+      margin-right: 10px; /* Spacing between icon and text */
+      vertical-align: middle; /* Align icon vertically */
+    ">
+      📦
+    </span>
+    Container Store
+    <span style="
+      font-size: 1.2em; /* Adjust icon size */
+      margin-left: 10px; /* Spacing between icon and text */
+      vertical-align: middle; /* Align icon vertically */
+    ">
+      📦
+    </span>
+  </h1>
+</div>
 <div align="center">
   <img src="https://www.shiplilly.com/wp-content/uploads/2016/01/ocean-shipping-containers.jpg" alt="Container Store Logo" width="200"/>
-  <p style="font-size: 1.2em; color: #796">Centralized Dev Container Configurations</p>
+  <p style="font-size: 1.2em; color: rgb(211, 161, 204)">Centralized Dev Container Configurations</p>
 </div>
 
 ---
