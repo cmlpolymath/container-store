@@ -1,8 +1,11 @@
 # Ignore virtual environments
 **/.venv/
+
 # Ignore node modules if applicable
 **/node_modules/
+
 # Ignore logs
 *.log
-# ignore other repos
-**/projects/Notebooks/git
+
+# Ignore the projects directory in smart_dev
+smart_dev/projects/
