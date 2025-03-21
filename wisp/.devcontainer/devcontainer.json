@@ -1,0 +1,40 @@
+{
+  "name": "Wisp",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": "..",
+    "args": {
+      "BASE_IMAGE": "alpine:latest"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "terminal.integrated.shell.linux": "/bin/zsh",
+        "terminal.integrated.fontFamily": "SauceCodePro Nerd Font"
+      },
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-vscode-remote.remote-containers",
+        "ms-azuretools.vscode-docker",
+        "ms-toolsai.jupyter",
+        "xelad0m.jupyter-toc",
+        "catppuccin.catppuccin-vsc",
+        "ms-toolsai.datawrangler",
+        "fill-labs.dependi",
+        "djsaunders1997.uv-wingman",
+        "visualstudioexptteam.vscodeintellicode",
+        "charliermarsh.ruff",
+        "ms-vscode.live-server"
+      ]
+    }
+  },
+  "runArgs": [
+  "-v", "/var/run/docker.sock:/var/run/docker.sock", 
+    "-v", "/mnt/c/Users/cml_p/Python:/mnt/hostuser/Python",
+    "-v", "/home/polymath/container_store:/home/polymath/container_store"
+],
+  "remoteUser": "vscode",
+  "postCreateCommand": "if [[ ! -d \".venv\" ]]; then uv venv && if [[ -f requirements.txt && -s requirements.txt ]]; then uv pip install -r requirements.txt; else echo 'No requirements file found or file empty'; fi; else echo \"Virtual environment already exists\"; fi"
+}
