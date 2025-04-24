@@ -67,9 +67,9 @@ Container Store is your central hub for professional-grade development container
 
 ```
 container-store/
-├── 📂 bit_net/             # Microsoft LLM in a 9GB image. We're inferencing on low-tier CPUs now.
+├── 📂 bit_net/            # Microsoft LLM in a 9GB image. We're inferencing on low-tier CPUs now.
 │   └── 📄 Dockerfile
-├── 📂 smart_dev/          # A nvidia-gpu configured data science container
+├── 📂 smart_dev/          # A nvidia gpu configured data science container
 │   └── 📂 .devcontainer/
 │       ├── 📄 Dockerfile
 │       ├── 📄 devcontainer.json
