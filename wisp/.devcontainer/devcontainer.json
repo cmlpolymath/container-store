@@ -2,10 +2,7 @@
   "name": "Wisp",
   "build": {
     "dockerfile": "Dockerfile",
-    "context": "..",
-    "args": {
-      "BASE_IMAGE": "alpine:latest"
-    }
+    "context": ".."
   },
   "customizations": {
     "vscode": {
@@ -30,11 +27,15 @@
       ]
     }
   },
+  "workspaceFolder": "/workspaces/wisp",
+  "mounts": [
+    "source=/mnt/c/Users/cml_p/Python,target=/mnt/hostuser/Python,type=bind,consistency=cached",
+    "source=/home/polymath/container_store,target=/home/vscode/container_store,type=bind,consistency=cached",
+    "source=/mnt/c/Users/cml_p/gpt4all/models,target=/mnt/hostuser/gpt4all/models,type=bind,consistency=cached"
+  ],
   "runArgs": [
-  "-v", "/var/run/docker.sock:/var/run/docker.sock", 
-    "-v", "/mnt/c/Users/cml_p/Python:/mnt/hostuser/Python",
-    "-v", "/home/polymath/container_store:/home/polymath/container_store"
-],
+    "-h", "wisp"
+  ],
   "remoteUser": "vscode",
-  "postCreateCommand": "if [[ ! -d \".venv\" ]]; then uv venv && if [[ -f requirements.txt && -s requirements.txt ]]; then uv pip install -r requirements.txt; else echo 'No requirements file found or file empty'; fi; else echo \"Virtual environment already exists\"; fi"
+  "postCreateCommand": "uv init base && uv add --directory /workspaces/wisp/base -r /workspaces/wisp/requirements.txt"
 }
