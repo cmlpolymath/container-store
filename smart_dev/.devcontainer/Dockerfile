@@ -72,8 +72,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends r-base && \
 # Switch back to vscode for interactive usage
 USER vscode
 WORKDIR /home/vscode
-# Ensure PATH includes Anaconda, Rust, and uv locations
-ENV PATH="/home/vscode/.cargo/bin:$CONDA_DIR/bin:$PATH"
+
+# Download, install uv, then remove the installer
+RUN curl -sSL https://astral.sh/uv/install.sh -o uv-installer.sh && \
+    sh uv-installer.sh && \
+    rm uv-installer.sh
+
+# Ensure the installed binary is on the `PATH`
+ENV PATH="/home/vscode/.local/bin/:$PATH"
 
 # (Optional) Healthcheck – adjust as needed
 HEALTHCHECK --interval=10m --timeout=3s CMD curl -f http://localhost:8080 || exit 1
