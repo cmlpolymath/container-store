@@ -1,0 +1,13 @@
+version: '1.1'
+services:
+  smart_dev:
+    build:
+      context: ..
+      dockerfile: .devcontainer/Dockerfile
+      args:
+        BASE_IMAGE: "nvidia/cuda:12.8.0-runtime-ubuntu24.04"
+    image: smart-dev:latest  # Enforces your custom name
+    runtime: nvidia
+    volumes:
+      - /mnt/c/Users/cml_p:/mnt/hostuser
+      - /mnt/g:/mnt/gdrive

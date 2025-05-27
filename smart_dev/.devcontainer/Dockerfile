@@ -1,88 +1,84 @@
-# Use NVIDIA CUDA runtime base image
-ARG BASE_IMAGE=nvidia/cuda:12.8.0-runtime-ubuntu24.04
-FROM ${BASE_IMAGE}
+# syntax=docker/dockerfile:1
 
-# Set non-interactive mode for apt and locale settings
+# ---------------- Stage 1: Builder ----------------
+ARG BASE_IMAGE=nvidia/cuda:12.8.0-runtime-ubuntu24.04
+FROM ${BASE_IMAGE} AS builder
+
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Update apt and install essential system packages (as root)
+# 1. Minimal tools for installer downloads
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    wget curl git build-essential ca-certificates libssl-dev libffi-dev \
-    python3 python3-pip locales sudo gnupg2 software-properties-common \
+      curl wget ca-certificates \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Generate locale and set environment variables
+#EXTENSION: build-time tool installs go here
+
+# 2. Install Miniconda
+ENV CONDA_DIR=/opt/conda
+RUN curl -sSLo /tmp/miniconda.sh https://repo.anaconda.com/miniconda/Miniconda3-py312_25.3.1-1-Linux-x86_64.sh && \
+    bash /tmp/miniconda.sh -b -p $CONDA_DIR && \
+    rm /tmp/miniconda.sh && \
+    $CONDA_DIR/bin/conda clean -y --all
+
+ENV PATH="$CONDA_DIR/bin:$PATH"
+
+# 3. Install uv, then PyTorch, then clean up
+ENV PYTORCH_INDEX_URL="https://download.pytorch.org/whl/cu121"
+RUN pip install --no-cache-dir uv && \
+    uv pip install --system torch==2.5.1 torchvision==0.20.1 torchaudio==2.5.1 --index-url $PYTORCH_INDEX_URL && \
+    uv cache clean && \
+    pip uninstall -y uv --no-input --root-user-action=ignore && \
+    conda clean -y --all
+
+#EXTENSION: add other Conda packages here
+
+# ---------------- Stage 2: Final (Runtime) ----------------
+FROM ${BASE_IMAGE} AS final
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# 1. Runtime OS packages
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      wget curl git ca-certificates locales sudo \
+      build-essential libssl-dev libffi-dev \
+      python3 python3-pip gnupg2 software-properties-common \
+      r-base && \
+      apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# 2. Locale
 RUN locale-gen en_US.UTF-8
 ENV LANG=en_US.UTF-8
 ENV LC_ALL=en_US.UTF-8
 
-# Create non-root user 'vscode' with passwordless sudo
-RUN useradd -m -s /bin/bash vscode && echo "vscode ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+# 3. Create vscode user (with sudo)
+RUN useradd -m -s /bin/bash vscode && \
+    echo "vscode ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers && \
+    mkdir -p /workspaces && chown -R vscode:vscode /workspaces
 
-# Switch to the vscode user for personal installations
+#EXTENSION: add runtime libraries here
+
+# 4. Import Conda from builder
+COPY --from=builder --chown=vscode:vscode /opt/conda /opt/conda
+ENV PATH="/opt/conda/bin:/home/vscode/.local/bin:${PATH}"
+
+# 5. Switch to vscode for user-level installs
 USER vscode
 WORKDIR /home/vscode
 
-##############################
-# Install Anaconda (as vscode)
-##############################
-# Install Anaconda into the user's home directory (e.g. /home/vscode/conda)
-ENV CONDA_DIR=/home/vscode/conda
-RUN wget --quiet https://repo.anaconda.com/archive/Anaconda3-2024.10-1-Linux-x86_64.sh -O /tmp/anaconda.sh && \
-    bash /tmp/anaconda.sh -b -p $CONDA_DIR && \
-    rm /tmp/anaconda.sh
-
-# Add Anaconda to PATH
-ENV PATH=$CONDA_DIR/bin:$PATH
-
-# (Optional) Update conda itself
-# RUN conda update -n base -c defaults conda -y
-
-##############################
-# Install uv via pip (in the conda environment)
-##############################
-RUN pip install uv
-
-##############################
-# Install Rust using rustup (as vscode)
-##############################
+# 6. Install Rust as vscode user
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain stable && \
-    echo 'export PATH="/home/vscode/.cargo/bin:$PATH"' >> /home/vscode/.bashrc && \
-    echo 'source /home/vscode/.cargo/env' >> /home/vscode/.bashrc
-# Verify Rust installation (optional)
-RUN /home/vscode/.cargo/bin/rustc --version && /home/vscode/.cargo/bin/cargo --version
+    echo 'export PATH="$HOME/.cargo/bin:$PATH"' >> ~/.bashrc && \
+    echo 'source $HOME/.cargo/env'    >> ~/.bashrc
 
-##############################
-# Install Python packages (e.g. PyTorch) using uv pip
-##############################
-# Set index URL for PyTorch packages
-ENV PYTORCH_INDEX_URL="https://download.pytorch.org/whl/cu121"
-RUN uv pip install --system torch==2.5.1 torchvision==0.20.1 torchaudio==2.5.1 --index-url $PYTORCH_INDEX_URL
+# 7. Verify Rust install
+RUN ~/.cargo/bin/rustc --version && ~/.cargo/bin/cargo --version
 
-##############################
-# Switch to root to install R (system-wide)
-##############################
-USER root
-RUN apt-get update && apt-get install -y --no-install-recommends r-base && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
-
-##############################
-# Final adjustments and ensure PATH is correct
-##############################
-# Switch back to vscode for interactive usage
-USER vscode
-WORKDIR /home/vscode
-
-# Download, install uv, then remove the installer
+# 8. Install Astral uv CLI
 RUN curl -sSL https://astral.sh/uv/install.sh -o uv-installer.sh && \
     sh uv-installer.sh && \
     rm uv-installer.sh
 
-# Ensure the installed binary is on the `PATH`
-ENV PATH="/home/vscode/.local/bin/:$PATH"
+#EXTENSION: add any other user tools here
 
-# (Optional) Healthcheck – adjust as needed
+# 9. Optional healthcheck
 HEALTHCHECK --interval=10m --timeout=3s CMD curl -f http://localhost:8080 || exit 1
-
-# Set default CMD or ENTRYPOINT as needed
-# CMD ["bash"]

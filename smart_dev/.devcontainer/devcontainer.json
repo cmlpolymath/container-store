@@ -1,44 +1,49 @@
-// For format details, see https://aka.ms/devcontainer.json. For config options, see the
-// README at: https://github.com/devcontainers/templates/tree/main/src/anaconda
 {
-	"name": "SmartDev",
-	"runArgs": ["--name", "SmartDev", "--gpus", "all"],
-	"build": { 
-		"context": "..",
-		"dockerfile": "Dockerfile",
-		"args": {
-			"BASE_IMAGE": "nvidia/cuda:12.8.0-runtime-ubuntu24.04"
-		}
-	},
-	"customizations": {
-	  "vscode": {
-		"extensions": [
-			"ms-python.python",
-			"ms-python.vscode-pylance",
-			"ms-vscode-remote.remote-containers",
-			"ms-azuretools.vscode-docker",
-			"rust-lang.rust-analyzer",
-			"ms-toolsai.jupyter",
-			"xelad0m.jupyter-toc",
-			"catppuccin.catppuccin-vsc",
-			"ms-toolsai.datawrangler",
-			"fill-labs.dependi",
-			"djsaunders1997.uv-wingman",
-			"reditorsupport.r",
-			"visualstudioexptteam.vscodeintellicode",
-			"charliermarsh.ruff",
-			"ms-vscode.live-server",
-			// SQL Tools extensions
-			"mtxr.sqltools",
-			"mtxr.sqltools-driver-mysql",
-			"mtxr.sqltools-driver-sqlite",
-			"mtxr.sqltools-driver-pg"
-			]
-		}
-	},
-  "runArgs": [
-    "-v", "/mnt/c/Users/cml_p:/mnt/hostuser"
-  ]
+    "name": "SmartDev",
+    "dockerComposeFile": "docker-compose.yml",
+    "service": "smart_dev",
+    "build": {
+        "context": "..",
+        "dockerfile": "Dockerfile",
+        "args": {
+            "BASE_IMAGE": "nvidia/cuda:12.8.0-runtime-ubuntu24.04"
+        },
+	"image": "smart-dev:latest"
+    },
+    "runArgs": [
+        "--name", "SmartDev",
+        "--gpus", "all",
+        "-v", "/mnt/c/Users/cml_p:/mnt/hostuser",
+	"-v", "/mnt/g:/mnt/gdrive"
+    ],
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-python.python",
+                "ms-python.vscode-pylance",
+                "ms-vscode-remote.remote-containers",
+                "ms-azuretools.vscode-docker",
+                "rust-lang.rust-analyzer",
+                "ms-toolsai.jupyter",
+                "xelad0m.jupyter-toc",
+                "catppuccin.catppuccin-vsc",
+                "ms-toolsai.datawrangler",
+                "fill-labs.dependi",
+                "djsaunders1997.uv-wingman",
+                "reditorsupport.r",
+                "visualstudioexptteam.vscodeintellicode",
+                "charliermarsh.ruff",
+                "ms-vscode.live-server",
+                "mtxr.sqltools",
+                "mtxr.sqltools-driver-mysql",
+                "mtxr.sqltools-driver-sqlite",
+                "mtxr.sqltools-driver-pg"
+            ]
+        }
+    },
+    "remoteUser": "vscode"
+}
+
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	// "features": {},
 
