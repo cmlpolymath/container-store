@@ -2,20 +2,6 @@
     "name": "SmartDev",
     "dockerComposeFile": "docker-compose.yml",
     "service": "smart_dev",
-    "build": {
-        "context": "..",
-        "dockerfile": "Dockerfile",
-        "args": {
-            "BASE_IMAGE": "nvidia/cuda:12.8.0-runtime-ubuntu24.04"
-        },
-	"image": "smart-dev:latest"
-    },
-    "runArgs": [
-        "--name", "SmartDev",
-        "--gpus", "all",
-        "-v", "/mnt/c/Users/cml_p:/mnt/hostuser",
-	"-v", "/mnt/g:/mnt/gdrive"
-    ],
     "customizations": {
         "vscode": {
             "extensions": [
@@ -43,6 +29,7 @@
     },
     "remoteUser": "vscode"
 }
+
 
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	// "features": {},

@@ -40,7 +40,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 # 1. Runtime OS packages
 RUN apt-get update && apt-get install -y --no-install-recommends \
       wget curl git ca-certificates locales sudo \
-      build-essential libssl-dev libffi-dev \
+      build-essential libssl-dev libffi-dev less nano\
       python3 python3-pip gnupg2 software-properties-common \
       r-base && \
       apt-get clean && rm -rf /var/lib/apt/lists/*
