@@ -35,35 +35,37 @@ RUN pip install --no-cache-dir uv && \
 # ---------------- Stage 2: Final (Runtime) ----------------
 FROM ${BASE_IMAGE} AS final
 
+# Declare build args immediately after FROM
+ARG USERNAME=vscode
+ARG USER_UID=1001
+
 ENV DEBIAN_FRONTEND=noninteractive
 
 # 1. Runtime OS packages
 RUN apt-get update && apt-get install -y --no-install-recommends \
       wget curl git ca-certificates locales sudo \
-      build-essential libssl-dev libffi-dev less nano\
+      build-essential libssl-dev libffi-dev less nano \
       python3 python3-pip gnupg2 software-properties-common \
       r-base && \
-      apt-get clean && rm -rf /var/lib/apt/lists/*
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # 2. Locale
 RUN locale-gen en_US.UTF-8
 ENV LANG=en_US.UTF-8
 ENV LC_ALL=en_US.UTF-8
 
-# 3. Create vscode user (with sudo)
-RUN useradd -m -s /bin/bash vscode && \
-    echo "vscode ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers && \
-    mkdir -p /workspaces && chown -R vscode:vscode /workspaces
-
-#EXTENSION: add runtime libraries here
+# 3. Create user (with sudo) letting useradd make its own group
+RUN useradd --uid ${USER_UID} -m -s /bin/bash ${USERNAME} && \
+    echo "${USERNAME} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers && \
+    mkdir -p /workspaces && chown -R ${USERNAME}:${USERNAME} /workspaces
 
 # 4. Import Conda from builder
-COPY --from=builder --chown=vscode:vscode /opt/conda /opt/conda
-ENV PATH="/opt/conda/bin:/home/vscode/.local/bin:${PATH}"
+COPY --from=builder --chown=${USERNAME}:${USERNAME} /opt/conda /opt/conda
+ENV PATH="/opt/conda/bin:/home/${USERNAME}/.local/bin:${PATH}"
 
 # 5. Switch to vscode for user-level installs
-USER vscode
-WORKDIR /home/vscode
+USER ${USERNAME}
+WORKDIR /home/${USERNAME}
 
 # 6. Install Rust as vscode user
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain stable && \
@@ -77,8 +79,6 @@ RUN ~/.cargo/bin/rustc --version && ~/.cargo/bin/cargo --version
 RUN curl -sSL https://astral.sh/uv/install.sh -o uv-installer.sh && \
     sh uv-installer.sh && \
     rm uv-installer.sh
-
-#EXTENSION: add any other user tools here
 
 # 9. Optional healthcheck
 HEALTHCHECK --interval=10m --timeout=3s CMD curl -f http://localhost:8080 || exit 1
