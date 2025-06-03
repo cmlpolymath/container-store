@@ -1,0 +1,45 @@
+version: "3.8"
+
+services:
+  smart_dev:
+    image: mcr.microsoft.com/devcontainers/base:ubuntu-22.04
+    container_name: smart_dev
+    command: sleep infinity
+    stdin_open: true
+    tty: true
+
+    # ─── GPU support (all GPUs) ───
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+    # ─── Mounts ───
+    volumes:
+      # 1) Project root (one level up from .devcontainer) → /workspaces/smart_dev
+      - ..:/workspaces/smart_dev:cached
+
+      # 2) Your Windows user folder → /mnt/hostuser
+      - /mnt/c/Users/cml_p:/mnt/hostuser:cached
+
+      # 3) G-drive mount → /mnt/gdrive
+      - /mnt/g:/mnt/gdrive:cached
+
+#   db:
+#     image: pgduckdb/pgduckdb:16-main
+#     ports:
+#       - "5433:5432"
+#     environment:
+#       POSTGRES_USER: "postgres"
+#       POSTGRES_PASSWORD: "duckdb"
+#     volumes:
+#       - pgduckdb_data:/var/lib/postgresql/data
+#       - ./docker/postgresql.conf:/etc/postgresql/postgresql.conf
+#     command: postgres -c "config_file=/etc/postgresql/postgresql.conf"
+#     restart: always
+
+# volumes:
+#   pgduckdb_data:

@@ -1,0 +1,17 @@
+ipykernel
+jupyter
+yfinance
+pandas
+numpy
+arch
+numba
+xgboost
+shap
+opacus
+plotly
+scipy
+pyarrow
+duckdb
+seaborn
+matplotlib
+dash
