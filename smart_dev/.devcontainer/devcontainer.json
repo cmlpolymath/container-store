@@ -5,34 +5,6 @@
   "dockerComposeFile": ["docker-compose.yml"],
   "service": "smart_dev",
   "workspaceFolder": "/workspaces/smart_dev",
-
-  // ─── Features to install Rust, R (via apt), Conda, CUDA, DuckDB CLI ───
-  "features": {
-    // 1. CUDA (no cuDNN, only toolkit) ── gives nvcc, libcuda, etc.
-    "ghcr.io/devcontainers/features/nvidia-cuda:1": {
-      "installToolkit": true,
-      "installCudnn": false,
-      "cudaVersion": "12.8"
-    },
-
-    // 2. Rust toolchain
-    "ghcr.io/devcontainers/features/rust:1": {
-      "version": "latest"
-    },
-
-    // 3. R (via apt) ── installs r-base
-    "ghcr.io/rocker-org/devcontainer-features/r-apt:0.5.0": {},
-
-    // 4. Miniconda (Conda) ── gives conda, base Python
-    "ghcr.io/devcontainers/features/conda:1": {},
-
-    // 5. DuckDB CLI ── installs `duckdb` binary with community extensions “quack”
-    "ghcr.io/eitsupi/devcontainer-features/duckdb-cli:1": {
-      "communityExtensions": "quack"
-    }
-  },
-
-  // ─── VS Code extensions to install in the container ───
   "customizations": {
     "vscode": {
       "extensions": [
@@ -58,9 +30,10 @@
       ]
     }
   },
-
   // ─── Use “vscode” as the unprivileged user (with sudo rights) ───
   "remoteUser": "vscode",
+  "containerUser": "vscode",
+  "updateRemoteUserUID": false,
 
   // ─── Bind mounts (cached for WSL2 performance) ───
   "mounts": [
