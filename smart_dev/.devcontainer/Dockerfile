@@ -28,6 +28,7 @@ RUN pip install --no-cache-dir uv && \
     uv pip install --system torch==2.5.1 torchvision==0.20.1 torchaudio==2.5.1 --index-url $PYTORCH_INDEX_URL && \
     uv cache clean && \
     pip uninstall -y uv --no-input --root-user-action=ignore && \
+    conda install -y --quiet pytorch::faiss-gpu && \
     conda clean -y --all
 
 #EXTENSION: add other Conda packages here

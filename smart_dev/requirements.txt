@@ -15,3 +15,7 @@ duckdb
 seaborn
 matplotlib
 dash
+tensorflow
+tensorflow-probability
+tf-keras
+GitPython
