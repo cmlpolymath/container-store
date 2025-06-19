@@ -48,9 +48,9 @@
     "-lc",
     "sudo apt-get update -y && \
     sudo apt-get install -y curl ca-certificates && \
-    curl -fsSL https://astral.sh/uv/install.sh | sh && \
     uv pip install --system --no-cache-dir torch==2.5.1 torchvision==0.20.1 torchaudio==2.5.1 --index-url https://download.pytorch.org/whl/cu121 && \
-    uv pip install --system --no-cache-dir -r /workspaces/smart_dev/requirements.txt"
-  ],
-  "postStartCommand": "sudo chown -R vscode:vscode /workspaces/smart_dev"
+    uv pip install --system --no-cache-dir -r /workspaces/smart_dev/requirements.txt && \
+    conda install -y --quiet pytorch::faiss-gpu && \
+    conda clean -y --all"
+  ]
 }

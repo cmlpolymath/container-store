@@ -38,7 +38,7 @@ FROM ${BASE_IMAGE} AS final
 
 # Declare build args immediately after FROM
 ARG USERNAME=vscode
-ARG USER_UID=1001
+ARG USER_UID=1000
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -55,15 +55,14 @@ RUN locale-gen en_US.UTF-8
 ENV LANG=en_US.UTF-8
 ENV LC_ALL=en_US.UTF-8
 
-# 3. Create user (with sudo) letting useradd make its own group
-# Create non-root user 'vscode' (UID=1001) with sudo privileges 
-# and ensure /workspaces directory is owned by this user
-RUN groupadd --gid 1001 vscode && \
-    useradd -m -s /bin/bash --uid 1001 --gid 1001 vscode && \
-    usermod -aG sudo vscode && \
-    echo "vscode ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/vscode && chmod 440 /etc/sudoers.d/vscode && \
-    mkdir -p /workspaces && chown 1001:1001 /workspaces
-
+# 3. Find user/group 1000 and rename it to 'vscode', then configure
+RUN groupmod -n ${USERNAME} $(getent group ${USER_UID} | cut -d: -f1) && \
+    usermod -l ${USERNAME} -d /home/${USERNAME} -m $(getent passwd ${USER_UID} | cut -d: -f1) && \
+    usermod -aG sudo ${USERNAME} && \
+    echo "${USERNAME} ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/${USERNAME} && \
+    chmod 440 /etc/sudoers.d/${USERNAME} && \
+    mkdir -p /workspaces && chown ${USERNAME}:${USERNAME} /workspaces
+    
 # 4. Import Conda from builder
 COPY --from=builder --chown=${USERNAME}:${USERNAME} /opt/conda /opt/conda
 ENV PATH="/opt/conda/bin:/home/${USERNAME}/.local/bin:${PATH}"
@@ -72,7 +71,11 @@ ENV PATH="/opt/conda/bin:/home/${USERNAME}/.local/bin:${PATH}"
 USER ${USERNAME}
 WORKDIR /home/${USERNAME}
 
-# 6. Install Rust as vscode user
+#5.1 Customize bash prompt to be "user@smart_dev" with color
+RUN sed -i 's/#force_color_prompt=yes/force_color_prompt=yes/' ~/.bashrc && \
+    echo 'export PS1="\[\033[01;32m\]\u@smart_dev\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\\$ "' >> ~/.bashrc
+
+    # 6. Install Rust as vscode user
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain stable && \
     echo 'export PATH="$HOME/.cargo/bin:$PATH"' >> ~/.bashrc && \
     echo 'source $HOME/.cargo/env'    >> ~/.bashrc
