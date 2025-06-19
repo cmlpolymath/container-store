@@ -69,12 +69,13 @@ Container Store is your central hub for professional-grade development container
 container-store/
 ├── 📂 bit_net/            # Microsoft LLM in a 9GB image. We're inferencing on low-tier CPUs now.
 │   └── 📄 Dockerfile
-├── 📂 smart_dev/          # A nvidia gpu configured data science container
+├── 📂 smart_dev/          # A Nvidia GPU configured data science container
 │   └── 📂 .devcontainer/
+│       ├── 📄 docker-compose.yml
 │       ├── 📄 Dockerfile
 │       ├── 📄 devcontainer.json
 │       └── 📄 requirements.txt
-└── 📂 wisp/               # Compact, powerful, and visually stunning Alpine image with zsh configs
+└── 📂 wisp/               # Compact, powerful, and visually stunning Alpine-based image with zsh configs
     └── 📂 .devcontainer/
         ├── 📄 Dockerfile
         ├── 📄 devcontainer.json
@@ -170,5 +171,5 @@ For issues or suggestions, please use the [GitHub Issue Tracker](https://github.
 
 ---
 
-*Happy coding with reproducible containers!* 🚀
+*Thank you for visiting. Please come again!* 👋
 
