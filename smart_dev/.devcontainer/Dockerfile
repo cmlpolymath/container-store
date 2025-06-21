@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 # ---------------- Stage 1: Builder ----------------
-ARG BASE_IMAGE=nvidia/cuda:12.8.0-runtime-ubuntu24.04
+ARG BASE_IMAGE=nvidia/cuda:12.8.0-cudnn-devel-ubuntu22.04
 FROM ${BASE_IMAGE} AS builder
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -47,7 +47,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
       wget curl git ca-certificates locales sudo \
       build-essential libssl-dev libffi-dev less nano \
       python3 python3-pip gnupg2 software-properties-common \
-      r-base && \
+      r-base fontconfig unzip && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # 2. Locale
@@ -55,9 +55,9 @@ RUN locale-gen en_US.UTF-8
 ENV LANG=en_US.UTF-8
 ENV LC_ALL=en_US.UTF-8
 
-# 3. Find user/group 1000 and rename it to 'vscode', then configure
-RUN groupmod -n ${USERNAME} $(getent group ${USER_UID} | cut -d: -f1) && \
-    usermod -l ${USERNAME} -d /home/${USERNAME} -m $(getent passwd ${USER_UID} | cut -d: -f1) && \
+# 3. Create a non-root user 'vscode' and configure
+RUN groupadd --gid ${USER_UID} ${USERNAME} && \
+    useradd --uid ${USER_UID} --gid ${USER_UID} -m ${USERNAME} && \
     usermod -aG sudo ${USERNAME} && \
     echo "${USERNAME} ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/${USERNAME} && \
     chmod 440 /etc/sudoers.d/${USERNAME} && \
@@ -67,15 +67,25 @@ RUN groupmod -n ${USERNAME} $(getent group ${USER_UID} | cut -d: -f1) && \
 COPY --from=builder --chown=${USERNAME}:${USERNAME} /opt/conda /opt/conda
 ENV PATH="/opt/conda/bin:/home/${USERNAME}/.local/bin:${PATH}"
 
+# 4.1 Install Starship system-wide AS ROOT
+RUN curl -sS https://starship.rs/install.sh | sh -s -- --yes
+
 # 5. Switch to vscode for user-level installs
 USER ${USERNAME}
 WORKDIR /home/${USERNAME}
 
-#5.1 Customize bash prompt to be "user@smart_dev" with color
-RUN sed -i 's/#force_color_prompt=yes/force_color_prompt=yes/' ~/.bashrc && \
-    echo 'export PS1="\[\033[01;32m\]\u@smart_dev\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\\$ "' >> ~/.bashrc
+# 5.1 Install Nerd Font for Starship
+RUN mkdir -p ~/.local/share/fonts && \
+    cd ~/.local/share/fonts && \
+    curl -fLO https://github.com/ryanoasis/nerd-fonts/releases/download/v3.2.1/FiraCode.zip && \
+    unzip FiraCode.zip && \
+    rm FiraCode.zip && \
+    fc-cache -fv
 
-    # 6. Install Rust as vscode user
+# 5.2 Configure Starship in .bashrc
+RUN echo 'eval "$(starship init bash)"' >> ~/.bashrc
+
+# 6. Install Rust as vscode user
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain stable && \
     echo 'export PATH="$HOME/.cargo/bin:$PATH"' >> ~/.bashrc && \
     echo 'source $HOME/.cargo/env'    >> ~/.bashrc
