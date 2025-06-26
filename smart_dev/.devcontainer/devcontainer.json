@@ -39,18 +39,4 @@
   "mounts": [
     "source=/mnt/c/Users/cml_p,target=/mnt/hostuser,type=bind,consistency=cached",
     "source=/mnt/g,target=/mnt/gdrive,type=bind,consistency=cached"
-  ],
-
-  // ─── Post-create: install uv CLI, then (later) install Python deps ───
-  // Runs as “vscode” user by default, so uv lands in ~/.local/bin and is on PATH.
-  "postCreateCommand": [
-    "bash",
-    "-lc",
-    "sudo apt-get update -y && \
-    sudo apt-get install -y curl ca-certificates && \
-    uv pip install --system --no-cache-dir torch==2.5.1 torchvision==0.20.1 torchaudio==2.5.1 --index-url https://download.pytorch.org/whl/cu121 && \
-    uv pip install --system --no-cache-dir -r /workspaces/smart_dev/requirements.txt && \
-    conda install -y --quiet pytorch::faiss-gpu && \
-    conda clean -y --all"
   ]
-}

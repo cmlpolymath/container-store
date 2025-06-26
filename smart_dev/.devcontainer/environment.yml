@@ -1,0 +1,44 @@
+# .devcontainer/environment.yml
+name: ml-unified
+channels:
+  - conda-forge
+dependencies:
+  # 1. Core & CUDA Toolkit
+  - python=3.11
+  - cudatoolkit=11.8.0
+
+  # 2. ML Frameworks
+  # Conda will find versions of these packages compatible with the above constraint.
+  - pytorch
+  - torchvision
+  - torchaudio
+  - tensorflow
+  - keras
+  - tensorflow-probability
+  - opacus
+  - faiss-gpu
+  
+  # 3. Other Core ML & Data Libraries
+  - xgboost
+  - scikit-learn
+  - numba
+  - pandas
+  - numpy
+  - pyarrow
+  - scipy
+  - yfinance
+  - GitPython
+  - duckdb
+  - shap
+  - tqdm
+  
+  # 4. Visualization & App
+  - plotly
+  - dash
+  - dash-bootstrap-components
+  - matplotlib
+  - seaborn
+  
+  # 5. Jupyter & Dev Tools
+  - ipykernel
+  - jupyter

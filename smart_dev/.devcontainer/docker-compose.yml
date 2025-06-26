@@ -7,7 +7,7 @@ services:
       context: ../
       dockerfile: .devcontainer/Dockerfile
       args:
-        BASE_IMAGE: "nvidia/cuda:12.8.0-runtime-ubuntu24.04"
+        BASE_IMAGE: "nvidia/cuda:12.1.1-base-ubuntu22.04"
         USER_ID: "1000"
     image: smart-dev:latest
     container_name: SmartDev
