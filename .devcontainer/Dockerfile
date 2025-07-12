@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 # ---------------- Stage 1: Builder ----------------
-ARG BASE_IMAGE=nvidia/cuda:12.8.0-cudnn-devel-ubuntu22.04
+ARG BASE_IMAGE=nvidia/cuda:11.8.0-devel-ubuntu22.04
 FROM ${BASE_IMAGE} AS builder
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -15,21 +15,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # 2. Install Miniconda
 ENV CONDA_DIR=/opt/conda
-RUN curl -sSLo /tmp/miniconda.sh https://repo.anaconda.com/miniconda/Miniconda3-py312_25.3.1-1-Linux-x86_64.sh && \
+RUN curl -sSLo /tmp/miniconda.sh https://repo.anaconda.com/miniconda/Miniconda3-py311_25.3.1-1-Linux-x86_64.sh && \
     bash /tmp/miniconda.sh -b -p $CONDA_DIR && \
     rm /tmp/miniconda.sh && \
     $CONDA_DIR/bin/conda clean -y --all
 
 ENV PATH="$CONDA_DIR/bin:$PATH"
-
-# 3. Install uv, then PyTorch, then clean up
-ENV PYTORCH_INDEX_URL="https://download.pytorch.org/whl/cu121"
-RUN pip install --no-cache-dir uv && \
-    uv pip install --system torch==2.5.1 torchvision==0.20.1 torchaudio==2.5.1 --index-url $PYTORCH_INDEX_URL && \
-    uv cache clean && \
-    pip uninstall -y uv --no-input --root-user-action=ignore && \
-    conda install -y --quiet pytorch::faiss-gpu && \
-    conda clean -y --all
 
 #EXTENSION: add other Conda packages here
 
@@ -98,5 +89,26 @@ RUN curl -sSL https://astral.sh/uv/install.sh -o uv-installer.sh && \
     sh uv-installer.sh && \
     rm uv-installer.sh
 
-# 9. Optional healthcheck
-HEALTHCHECK --interval=10m --timeout=3s CMD curl -f http://localhost:8080 || exit 1
+# 9. GPU environment variables
+ENV NVIDIA_VISIBLE_DEVICES=all \
+    NVIDIA_DRIVER_CAPABILITIES=compute,utility \
+    CUDA_HOME=/usr/local/cuda \
+    LD_LIBRARY_PATH=/usr/local/cuda/lib64:${LD_LIBRARY_PATH}
+
+# 9a. Make a dedicated UV project directory
+RUN mkdir -p /workspaces/smart_dev/ml-unified
+
+# 9b. Copy in your pyproject.toml for the UV project
+COPY --chown=${USERNAME}:${USERNAME} .devcontainer/pyproject.toml \
+     /workspaces/smart_dev/ml-unified/pyproject.toml
+
+# 9c. Bootstrap the UV venv in ml-unified and install all deps
+RUN cd /workspaces/smart_dev/ml-unified && \
+    uv venv --python 3.11 && \
+    uv sync
+
+# 11. Final working directory
+WORKDIR /workspaces/smart_dev
+
+# Keep container alive for VS Code
+CMD ["sleep", "infinity"]

@@ -1,11 +1,15 @@
-# Ignore virtual environments
-**/.venv/
+# Directories to ignore
+.mypy_cache/
+.venv/
+node_modules/
+.ipynb_checkpoints/
+__pycache__/
+projects/
+ml-unified/
+temp/
 
-# Ignore node modules if applicable
-**/node_modules/
-
-# Ignore logs
+# File patterns to ignore
 *.log
-
-# Ignore the projects directory in smart_dev
-smart_dev/projects/
+*.tar.gz
+*.zip
+*.txt
